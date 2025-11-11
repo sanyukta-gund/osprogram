@@ -1,0 +1,131 @@
+/*
+. Study of Basic Linux Commands: echo, ls, read, cat, touch, test, loops, arithmetic comparison,
+conditional loops, grep,sed etc.
+*/
+
+/*
+run kasa karycha
+touch linux_commands_demo.sh
+nano linux_commands_demo.sh
+ctrl+o
+ctrl+x
+chmod +x linux_commands_demo.sh
+./linux_commands_demo.sh
+
+*/
+
+
+#!/bin/bash
+
+
+echo
+echo "1) echo command"
+echo "Hello, World!"
+echo -n "No newline here"
+echo
+echo "Current user: $USER"
+
+
+echo
+echo "2) ls command"
+echo "Listing files:"
+ls -1
+echo "Listing all files including hidden:"
+ls -a
+
+
+echo
+echo "3) read command"
+read -p "Enter your name: " name
+echo "Hello, $name!"
+
+
+echo
+echo "4) cat command"
+echo "Creating a sample file sample.txt with some content..."
+echo -e "Hello\nThis is a sample file\nLinux demo" > sample.txt
+echo "Displaying file content using cat:"
+cat sample.txt
+
+
+echo
+echo "5) touch command"
+echo "Creating empty files file1.txt and file2.txt..."
+touch file1.txt file2.txt
+ls -1 | grep "file"
+
+
+echo
+echo "6) test command"
+if [ -f "sample.txt" ]; then
+    echo "sample.txt exists"
+fi
+if [ -d "/tmp" ]; then
+    echo "/tmp directory exists"
+fi
+
+
+a=5
+b=10
+if [ $a -lt $b ]; then
+    echo "$a is less than $b"
+fi
+
+
+echo
+echo "7) For loop demo"
+for i in {1..5}; do
+    echo "Number: $i"
+done
+
+echo
+echo "While loop demo"
+count=1
+while [ $count -le 5 ]; do
+    echo "Count: $count"
+    count=$((count + 1))
+done
+
+
+echo
+echo "8) Arithmetic operations"
+echo "a=5, b=3"
+echo "a+b=$((a+b))"
+echo "a-b=$((a-b))"
+echo "a*b=$((a*b))"
+echo "a/b=$((a/b))"
+echo "a%b=$((a%b))"
+
+
+echo
+echo "9) grep command demo"
+echo "Searching for 'Linux' in sample.txt"
+grep "Linux" sample.txt
+
+
+echo
+echo "10) sed command demo"
+echo "Replacing 'sample' with 'demo' in sample.txt"
+sed 's/sample/demo/' sample.txt
+
+echo "Printing lines 2 to 3 using sed"
+sed -n '2,3p' sample.txt
+
+echo "Replacing in-place using sed (backup created)"
+sed -i.bak 's/Linux/Linux OS/' sample.txt
+cat sample.txt
+
+
+echo
+echo "11) Loop with grep demo"
+for file in *.txt; do
+    if [ -f "$file" ]; then
+        echo "Checking $file for 'Hello'"
+        grep "Hello" "$file"
+    fi
+done
+
+echo
+
+
+
