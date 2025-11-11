@@ -1,0 +1,89 @@
+/*
+. Implement the C program in which main program accepts the integers to be sorted. Main program
+uses the FORK system call to create a new process called a child process. Parent process sorts the
+integers using sorting algorithm and waits for child process using WAIT system call to sort the integers
+using any sorting algorithm. Also demonstrate zombie and orphan states.
+*/
+
+/* 
+nano sort_fork.c
+gcc sort_fork.c -o sort_fork
+./sort_fork
+*/
+
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <sys/wait.h>
+
+
+void bubbleSort(int arr[], int n) {
+    int i, j, temp;
+    for(i = 0; i < n-1; i++) {
+        for(j = 0; j < n-i-1; j++) {
+            if(arr[j] > arr[j+1]) {
+                temp = arr[j];
+                arr[j] = arr[j+1];
+                arr[j+1] = temp;
+            }
+        }
+    }
+}
+
+void printArray(int arr[], int n) {
+    for(int i = 0; i < n; i++)
+        printf("%d ", arr[i]);
+    printf("\n");
+}
+
+int main() {
+    int n;
+    printf("Enter number of integers: ");
+    scanf("%d", &n);
+
+    int arr[n], arr_child[n];
+
+    printf("Enter %d integers: ", n);
+    for(int i = 0; i < n; i++) {
+        scanf("%d", &arr[i]);
+        arr_child[i] = arr[i]; 
+    }
+
+    pid_t pid = fork();
+
+    if(pid < 0) {
+        perror("Fork failed");
+        exit(1);
+    }
+    else if(pid == 0) {
+        
+        printf("\n[Child] PID: %d, Parent PID: %d\n", getpid(), getppid());
+        bubbleSort(arr_child, n);
+        printf("[Child] Sorted array: ");
+        printArray(arr_child, n);
+
+        
+        printf("[Child] Sleeping for 5 seconds to demonstrate zombie...\n");
+        sleep(5); // During this time, child becomes zombie until parent calls wait
+        printf("[Child] Exiting.\n");
+        exit(0);
+    }
+    else {
+        
+        printf("\n[Parent] PID: %d\n", getpid());
+        bubbleSort(arr, n);
+        printf("[Parent] Sorted array: ");
+        printArray(arr, n);
+
+        
+        printf("[Parent] Sleeping for 2 seconds...\n");
+        sleep(2);
+
+        
+        wait(NULL);
+        printf("[Parent] Child process terminated. Exiting.\n");
+    }
+
+    return 0;
+}

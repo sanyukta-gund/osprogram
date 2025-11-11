@@ -1,0 +1,77 @@
+/*
+ Implement the C program in which main program accepts an array. Main program uses the FORK
+system call to create a new process called a child process. Parent process sorts an array and passes
+the sorted array to child process through the command line arguments of EXECVE system call. The
+child process uses EXECVE system call to load new program which display array in reverse order.
+*/
+
+/* run kasa karnar 
+nano child.c
+gcc child.c -o child
+./child
+/*
+
+
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <sys/wait.h>
+#include <string.h>
+
+int compare(const void *a, const void *b) {
+    return (*(int*)a - *(int*)b);
+}
+
+int main(int argc, char *argv[]) {
+    
+    if(argc > 1 && strcmp(argv[1], "reverse") == 0) {
+        printf("Child: Array in reverse order: ");
+        for(int i = argc-1; i > 1; i--) {
+            printf("%s ", argv[i]);
+        }
+        printf("\n");
+        return 0;
+    }
+
+    
+    int n;
+    printf("Enter number of elements: ");
+    scanf("%d", &n);
+
+    int arr[n];
+    printf("Enter %d integers: ", n);
+    for(int i = 0; i < n; i++)
+        scanf("%d", &arr[i]);
+
+   
+    qsort(arr, n, sizeof(int), compare);
+
+
+    char *args[n+3]; 
+    args[0] = argv[0]; 
+    args[1] = "reverse"; 
+    for(int i = 0; i < n; i++) {
+        char *num = malloc(12);
+        sprintf(num, "%d", arr[i]);
+        args[i+2] = num;
+    }
+    args[n+2] = NULL;
+
+    pid_t pid = fork();
+    if(pid < 0) {
+        perror("Fork failed");
+        exit(1);
+    } else if(pid == 0) {
+        
+        execve(args[0], args, NULL);
+        perror("execve failed");
+        exit(1);
+    } else {
+       
+        wait(NULL);
+        printf("Parent: Child has finished execution.\n");
+    }
+
+    return 0;
+}

@@ -1,0 +1,97 @@
+/*
+FIFOS: Full duplex communication between two independent processes. First process accepts
+sentences and writes on one pipe to be read by second process and second process counts number of
+characters, number of words and number of lines in accepted sentences, writes this output in a text file
+and writes the contents of the file on second pipe to be read by first process and displays onstandard
+output.
+*/
+
+/*
+nano page_replacement.c
+gcc page_replacement.c -o page_replacement
+./page_replacement
+*/
+
+
+#include <stdio.h>
+#include <limits.h>
+
+void fcfs(int pages[], int n, int frames) {
+    int frame[frames], i, j;
+    int page_faults = 0;
+    for(i = 0; i < frames; i++) frame[i] = -1;
+    for(i = 0; i < n; i++) {
+        int flag = 0;
+        for(j = 0; j < frames; j++) if(frame[j] == pages[i]) flag = 1;
+        if(flag == 0) {
+            frame[page_faults % frames] = pages[i];
+            page_faults++;
+        }
+    }
+    printf("FCFS Page Faults: %d\n", page_faults);
+}
+
+void lru(int pages[], int n, int frames) {
+    int frame[frames], count[frames], i, j;
+    int page_faults = 0;
+    for(i = 0; i < frames; i++) { frame[i] = -1; count[i] = 0; }
+    for(i = 0; i < n; i++) {
+        int flag = 0;
+        for(j = 0; j < frames; j++) {
+            if(frame[j] == pages[i]) { flag = 1; count[j] = i + 1; break; }
+        }
+        if(flag == 0) {
+            int lru_index = 0, min = INT_MAX;
+            for(j = 0; j < frames; j++) if(count[j] < min) { min = count[j]; lru_index = j; }
+            frame[lru_index] = pages[i];
+            count[lru_index] = i + 1;
+            page_faults++;
+        }
+    }
+    printf("LRU Page Faults: %d\n", page_faults);
+}
+
+void optimal(int pages[], int n, int frames) {
+    int frame[frames], i, j;
+    int page_faults = 0;
+    for(i = 0; i < frames; i++) frame[i] = -1;
+    for(i = 0; i < n; i++) {
+        int flag = 0;
+        for(j = 0; j < frames; j++) if(frame[j] == pages[i]) flag = 1;
+        if(flag == 0) {
+            int k, replace_index = -1;
+            for(j = 0; j < frames; j++) if(frame[j] == -1) { replace_index = j; break; }
+            if(replace_index == -1) {
+                int max_distance = -1;
+                for(j = 0; j < frames; j++) {
+                    int found = 0;
+                    for(k = i + 1; k < n; k++) {
+                        if(frame[j] == pages[k]) {
+                            if(k > max_distance) { max_distance = k; replace_index = j; }
+                            found = 1;
+                            break;
+                        }
+                    }
+                    if(!found) { replace_index = j; break; }
+                }
+            }
+            frame[replace_index] = pages[i];
+            page_faults++;
+        }
+    }
+    printf("Optimal Page Faults: %d\n", page_faults);
+}
+
+int main() {
+    int n, frames;
+    scanf("%d", &n);
+    int pages[n];
+    for(int i = 0; i < n; i++) scanf("%d", &pages[i]);
+    scanf("%d", &frames);
+    if(frames < 3) return 0;
+    fcfs(pages, n, frames);
+    lru(pages, n, frames);
+    optimal(pages, n, frames);
+    return 0;
+}
+

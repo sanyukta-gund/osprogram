@@ -1,0 +1,56 @@
+/*
+Inter-process Communication using Shared Memory using System V. Application to demonstrate:
+Client and Server Programs in which server process creates a shared memory segment and writes the
+message to the shared memory segment. Client process reads the message from the shared memory
+segment and displays it to the screen.
+*/
+
+/*
+nano shared_memory.c
+gcc shared_memory.c -o shared_memory
+./shared_memory
+*/
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/ipc.h>
+#include <sys/shm.h>
+#include <string.h>
+#include <unistd.h>
+#include <sys/wait.h>
+
+#define SHM_SIZE 1024
+
+int main() {
+    key_t key = ftok("shmfile", 65);
+    int shmid = shmget(key, SHM_SIZE, 0666 | IPC_CREAT);
+    if(shmid == -1) { perror("shmget"); exit(1); }
+
+    char *shared_mem = (char*) shmat(shmid, NULL, 0);
+    if(shared_mem == (char*) -1) { perror("shmat"); exit(1); }
+
+    pid_t pid = fork();
+
+    if(pid < 0) {
+        perror("fork"); exit(1);
+    } 
+    else if(pid > 0) {
+        
+        printf("Enter a message to write to shared memory: ");
+        fgets(shared_mem, SHM_SIZE, stdin);
+        wait(NULL); 
+        shmdt(shared_mem);
+        shmctl(shmid, IPC_RMID, NULL); 
+    } 
+    else {
+       
+        sleep(1); 
+        printf("Message read from shared memory: %s\n", shared_mem);
+        shmdt(shared_mem);
+        exit(0);
+    }
+
+    return 0;
+}
+
+
